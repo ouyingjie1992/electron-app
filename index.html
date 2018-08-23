@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>联合见智</title>
+<!-- 
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=VT323" />
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1"
+    crossorigin="anonymous">
+ -->
+  <link rel="stylesheet" type="text/css" href="lib/tab-chrome/css/normalize.css" />
+  <link rel="stylesheet" href="lib/tab-chrome/css/chrome-tabs.css">
+  <style>
+    body {
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    * {
+      font-family: 'VT323', sans-serif;
+    }
+
+    #loading {
+      position: absolute;
+      width: 100%;
+      top: 45%;
+      text-align: center;
+    }
+
+    #serverLog {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: none;
+      overflow: auto;
+    }
+
+    .expressApp {
+      display: flex !important;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .expressAppHide {
+      flex: 0 1;
+      width: 0px;
+      height: 0px;
+    }
+    .htmleaf-content {
+      width: 100%;
+    }
+    .chrome-body {
+      height: 100%;
+    }
+    .chrome-content {
+      height: 100%;
+      width: 100%;
+      display: inline-flex;
+    }
+    .chrome-tab {
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loading">
+    <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+  </div>
+  <div id="serverLog"></div>
+
+  <div class="htmleaf-container expressApp">
+    <div class="htmleaf-content">
+      <div class="chrome-tabs-shell">
+        <div class="chrome-tabs">
+          <div class="chrome-tab" data-id="chrome-content-01">
+            <div class="chrome-tab-favicon" style="background-image: url('lib/tab-chrome/img/favicon.ico')"></div>
+            <div class="chrome-tab-title">联合见智</div>
+            <div class="chrome-tab-close"></div>
+            <div class="chrome-tab-curves">
+              <div class="chrome-tab-curves-left-shadow"></div>
+              <div class="chrome-tab-curves-left-highlight"></div>
+              <div class="chrome-tab-curves-left"></div>
+              <div class="chrome-tab-curves-right-shadow"></div>
+              <div class="chrome-tab-curves-right-highlight"></div>
+              <div class="chrome-tab-curves-right"></div>
+            </div>
+          </div>
+        </div>
+        <div class="chrome-shell-bottom-bar"></div>
+      </div>
+      <div class="chrome-body">
+        <webview class="chrome-content" id="chrome-content-01">
+        </webview>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    window.nodeRequire = require;
+    delete window.require;
+    delete window.exports;
+    delete window.module;
+  </script>
+
+  <script src="lib/tab-chrome/js/deps/jquery.min.js"></script>
+  <script src="lib/tab-chrome/js/deps/jquery-ui.min.js"></script>
+  <script src="lib/tab-chrome/js/chrome-tabs.js"></script>
+  <script>
+    // window.$ = window.jQuery = require("lib/tab-chrome/js/deps/jquery.min.js");
+    // require("lib/tab-chrome/js/deps/jquery-ui.min.js");
+    // require("lib/tab-chrome/js/chrome-tabs.js");
+    var $chromeTabsExampleShell = $('.chrome-tabs-shell');
+    var $chromeTabsBody = $('.chrome-body');
+    chromeTabs.init({
+        $shell: $chromeTabsExampleShell,
+        $body: $chromeTabsBody,
+        minWidth: 45,
+        maxWidth: 160
+    });
+    var addTab = function(url) {
+      chromeTabs.addNewTab($chromeTabsExampleShell, $chromeTabsBody, {
+          favicon: 'lib/tab-chrome/img/favicon.ico',
+          title: '联合见智',
+          data: {
+              timeAdded: +new Date()
+          },
+          url: url
+      });
+    };
+
+    const { ipcRenderer } = nodeRequire('electron'),
+      expressAppUrl = "http://10.1.90.49:97",
+      spawn = nodeRequire("child_process").spawn,
+      // For electron-packager change cwd in spawn to app.getAppPath() and
+      // uncomment the app require below
+      //app = require('electron').remote.app,
+      node = spawn(".\\node.exe", ["./express-app/bin/www"], {
+        cwd: process.cwd()
+      }),
+      request = nodeRequire("request"),
+      _ = nodeRequire("lodash"),
+      key = nodeRequire("keymaster"),
+      $serverLog = $("#serverLog"),
+      $expressApp = $("#chrome-content-01"),
+      $loading = $("#loading");
+
+    const webview = document.getElementById('chrome-content-01')
+    webview.addEventListener('new-window', (e) => {
+      const protocol = nodeRequire('url').parse(e.url).protocol
+      if (protocol === 'http:' || protocol === 'https:') {
+        // ipcRenderer.openExternal(e.url)
+        // let modal = window.open(e.url);
+        // $expressApp.attr("src", e.url);
+        addTab(e.url);
+      }
+
+    });
+
+
+    ipcRenderer.on('stop-server', (event, data) => {
+      // This is okay for now but there is a better solution. We can use IPC to
+      // tell the server (the Express app itself) to gracefully shutdown. This
+      // would be much better especially if we had database connections or other
+      // resources we were using that needed to be cleaned up.
+      node.kill('SIGINT');
+    });
+
+    key("f1", () => {
+      if ($serverLog.css("display") === "none") {
+        $serverLog.css("display", "block");
+        $expressApp.addClass("expressAppHide");
+      } else {
+        $expressApp.removeClass("expressAppHide");
+        $serverLog.css("display", "none");
+      }
+    });
+
+    function strip(s) {
+      // regex from: http://stackoverflow.com/a/29497680/170217
+      return s.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+    }
+
+    function redirectOutput(x) {
+      let lineBuffer = "";
+
+      x.on('data', function (data) {
+        lineBuffer += data.toString();
+        let lines = lineBuffer.split("\n");
+
+        _.forEach(lines, (l) => {
+          if (l !== "") {
+            $serverLog.append(strip(l) + "<br/>");
+          }
+        });
+
+        lineBuffer = lines[lines.length - 1];
+      });
+    }
+
+    redirectOutput(node.stdout);
+    redirectOutput(node.stderr);
+
+    let checkServerRunning = setInterval(() => {
+      request(expressAppUrl, (error, response, body) => {
+        if (!error && response.statusCode == 200) {
+          $expressApp.attr("src", expressAppUrl);
+          $loading.css("display", "none");
+          $expressApp.css("display", "inline-flex");
+          clearInterval(checkServerRunning);
+        }
+      });
+    }, 1000);
+  </script>
+</body>
+
+</html>
