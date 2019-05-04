@@ -1,22 +1,29 @@
 {
-  "name": "lh-app-electron",
-  "description": "lh-app-electron",
-  "version": "1.0.0",
-  "main": "main.js",
-  "authors": [
-    "<ouyj@lhcis.com>"
-  ],
-  "license": "GPL-3.0",
-  "private": true,
-  "scripts": {
-    "start": ".\\node.exe start-electron.js"
-  },
-  "dependencies": {
-    "electron": "^2.0.3",
-    "jquery": "^3.3.1",
-    "keymaster": "^1.6.2",
-    "lodash": "^4.17.10",
-    "request": "^2.87.0",
-    "strip": "^3.0.0"
-  }
+    "name": "sin-app",
+    "description": "桌面app应用",
+    "version": "1.0.0",
+    "main": "main.js",
+    "authors": [
+        "<ouyingjie1992@qq.com>"
+    ],
+    "license": "GPL-3.0",
+    "private": true,
+    "scripts": {
+        "start": ".\\node.exe start-electron.js",
+        "start-mac": "/usr/local/bin/node start-electron.js",
+        "packager-windows": "electron-packager . 桌面app应用 --platform=win32 --arch=ia32 --icon=lib/tab-chrome/img/favicon2.ico --out=../app/ --asar",
+        "packager-mac": "electron-packager . 桌面app应用 --platform=darwin --arch=x64 --icon=lib/tab-chrome/img/favicon2.ico --out=../app/ --asar"
+    },
+    "dependencies": {
+        "electron": "^2.0.9",
+        "electron-squirrel-startup": "^1.0.0",
+        "jquery": "^3.3.1",
+        "keymaster": "^1.6.2",
+        "lodash": "^4.17.10",
+        "request": "^2.87.0",
+        "strip": "^3.0.0"
+    },
+    "devDependencies": {
+        "electron-winstaller": "^2.6.4"
+    }
 }
