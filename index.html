@@ -139,12 +139,12 @@
         const {
             ipcRenderer
         } = nodeRequire('electron'),
-            expressAppUrl = "http://baidu.com",
+            expressAppUrl = "http://localhost:8080/#/",
             spawn = nodeRequire("child_process").spawn,
             // For electron-packager change cwd in spawn to app.getAppPath() and
             // uncomment the app require below
             //app = require('electron').remote.app,
-            node = spawn(".\\node.exe", ["./express-app/bin/www"], {
+            node = spawn("/usr/local/bin/node", ["./express-app/bin/www"], {
                 cwd: process.cwd()
             }),
             request = nodeRequire("request"),

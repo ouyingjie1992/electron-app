@@ -12,7 +12,7 @@ npm run-script packager-windows
 ##使用说明-mac
 修改如下代码：
 1、index.html: 
-	"node = spawn(".\\node", ["./express-app/bin/www"], {"==>"node = spawn("./node", ["./express-app/bin/www"], {"
+	"node = spawn(".\\node.exe", ["./express-app/bin/www"], {"==>"node = spawn("/usr/local/bin/node", ["./express-app/bin/www"], {"
 2、运行
 	npm run-script start-mac
 3、打包命令
